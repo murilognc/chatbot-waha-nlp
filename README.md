@@ -1,8 +1,10 @@
-# Chatbot WhatsApp — projeto individual para aula
+# Chatbot WhatsApp com WAHA e NLP — projeto da aula
 
-Projeto didático com **WAHA + Node.js + Express + JavaScript + Docker Compose**. Cada aluno ou grupo executa sua própria cópia do projeto, conecta seu próprio número de WhatsApp à sua instância local da WAHA e desenvolve/testa o chatbot sem instalar Python ou Node.js no computador.
+Projeto didático com **WAHA + Node.js + Express + Docker Compose**. Um chatbot recebe mensagens do WhatsApp, classifica a intenção com **TF-IDF + Regressão Logística** (implementados em JavaScript) e responde com dados de um catálogo e de pedidos simulados.
 
-> **Importante sobre a sessão já conectada pelo professor:** este pacote é uma instalação independente para os computadores dos alunos. Ele não altera nem importa a sessão que já está conectada no computador do professor. A sessão do professor permanece no volume Docker existente dele. Cada aluno cria e autentica uma sessão própria chamada `default` na sua própria instalação.
+Cada aluno ou grupo executa sua própria cópia do projeto e conecta o próprio número de WhatsApp à sua instância local da WAHA. Não é preciso instalar Python, Node.js ou bibliotecas no computador: tudo roda em containers.
+
+> **Sobre a sessão já conectada pelo professor:** este projeto é uma instalação independente. Ele não altera nem importa a sessão do computador do professor, que fica em outro volume Docker e tem outro nome. Cada aluno cria e autentica uma sessão própria chamada `default` na sua instalação.
 
 ## 1. Arquitetura
 
@@ -11,170 +13,35 @@ WhatsApp do aluno
        |
        | mensagem recebida
        v
-WAHA (container Docker do aluno)
+WAHA (container "waha")
        |
        | POST http://chatbot:3001/webhook
        v
-Node.js + Express (container Docker do aluno)
+Node.js + Express (container "chatbot")
        |
-       +--> nlp.js       classifica intenção
-       +--> chatbot.js   monta resposta
-       +--> data.js      consulta catálogo/pedidos simulados
+       +--> nlp.js       classifica a intenção (TF-IDF + Regressão Logística)
+       +--> chatbot.js   monta a resposta
+       +--> data.js      consulta catálogo e pedidos simulados
        |
-       | POST /api/sendText
+       | POST http://waha:3000/api/sendText
        v
-WAHA --> WhatsApp do aluno
+WAHA --> WhatsApp de quem enviou a mensagem
 ```
 
-Cada instalação tem seus próprios containers, chave de API, volume de sessão e autenticação QR. O endereço `http://chatbot:3001/webhook` funciona dentro da rede Docker Compose; não é necessário ngrok para essa arquitetura local.
+Os dois containers estão na mesma rede do Docker Compose e se encontram pelo nome do serviço (`waha` e `chatbot`). Por isso não é necessário ngrok nem `host.docker.internal`. Cada instalação tem seus próprios containers, chave de API, volume de sessão e QR Code.
 
 ## 2. Requisitos
 
-- Docker Desktop instalado e iniciado (Windows, macOS ou Linux) com Docker Compose disponível.
+- Docker Desktop instalado e em execução (Windows, macOS ou Linux), com Docker Compose.
 - Internet para baixar as imagens.
-- WhatsApp em um celular para ler o QR Code.
-- Não é necessário instalar Python, Node.js, npm ou bibliotecas no host.
+- Um celular com WhatsApp para ler o QR Code. Prefira um número de teste (veja [Segurança](#14-segurança-e-uso-responsável)).
 
-Se o laboratório não permitir instalar Docker Desktop, o professor/administrador precisa preparar essa instalação antes da aula.
+Se o laboratório não permitir instalar o Docker Desktop, o professor ou o administrador precisa prepará-lo antes da aula.
 
-## 3. Preparar o projeto
-
-1. Extraia a pasta `chatbot-waha-aula`.
-2. Abra um terminal dentro dessa pasta — é a pasta que contém `docker-compose.yml`.
-3. Copie o arquivo de ambiente:
-
-```bash
-cp .env.example .env
-```
-
-No PowerShell do Windows, use:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-4. Gere uma chave aleatória. macOS/Linux:
-
-```bash
-openssl rand -hex 24
-```
-
-No PowerShell, uma alternativa é:
-
-```powershell
--join ((1..48) | ForEach-Object { '{0:x}' -f (Get-Random -Maximum 16) })
-```
-
-5. Edite `.env` e substitua `COLOQUE_AQUI_UMA_CHAVE_ALEATORIA` pela chave gerada.
-
-### Escolha da imagem WAHA por arquitetura
-
-No `.env`, ajuste `WAHA_IMAGE`:
-
-- Mac com Apple Silicon (M1/M2/M3/M4): `devlikeapro/waha:arm`
-- Windows/Linux x86_64: `devlikeapro/waha:latest`
-
-A imagem `arm` é para processadores ARM. Não selecione essa imagem em computadores Intel/AMD x86_64. Consulte a documentação oficial para outras arquiteturas/tags.
-
-## 4. Subir o ambiente
-
-Na pasta do projeto:
-
-```bash
-docker compose up -d --build
-```
-
-Verifique os containers:
-
-```bash
-docker compose ps
-```
-
-Acompanhe os logs:
-
-```bash
-docker compose logs -f waha
-```
-
-Em outra janela, se necessário:
-
-```bash
-docker compose logs -f chatbot
-```
-
-## 5. Conectar o WhatsApp do aluno
-
-1. Abra `http://localhost:3000/dashboard`.
-2. Conecte o Dashboard à API usando a chave definida em `WAHA_API_KEY` no `.env`, caso seja solicitada.
-3. Na área **Sessions**, crie uma sessão chamada exatamente `default`.
-4. Inicie a sessão e aguarde o estado `SCAN_QR_CODE`.
-5. Exiba o QR Code e leia pelo WhatsApp do celular: **Dispositivos conectados → Conectar dispositivo**.
-6. Aguarde o estado `WORKING`.
-
-O Compose define o webhook global da WAHA para `http://chatbot:3001/webhook`, ouvindo o evento `message`. Assim, a sessão `default` envia eventos ao servidor JavaScript automaticamente. Não configure um segundo webhook igual na sessão, para não duplicar eventos.
-
-> A sessão já conectada no computador do professor tem outro nome e está em outro volume. Não tente usar esse nome no projeto do aluno: cada instalação local cria sua própria sessão `default`.
-
-## 6. Abrir o simulador e testar sem WhatsApp
-
-- Simulador web: http://localhost:3001
-- Saúde do chatbot: http://localhost:3001/health
-- Produtos: http://localhost:3001/api/produtos
-- Pedido de exemplo: http://localhost:3001/api/pedidos/1002
-- Dashboard WAHA: http://localhost:3000/dashboard
-
-Teste a classificação sem enviar mensagem real:
-
-```bash
-curl -X POST http://localhost:3001/simular \
-  -H 'Content-Type: application/json' \
-  -d '{"texto":"Qual o preço do teclado?"}'
-```
-
-No PowerShell, pode usar:
-
-```powershell
-Invoke-RestMethod -Method Post -Uri http://localhost:3001/simular -ContentType 'application/json' -Body '{"texto":"Qual o preço do teclado?"}'
-```
-
-## 7. Testar o webhook localmente
-
-Para testar o processamento sem depender do WhatsApp, altere `SEND_ENABLED=false` no `.env` e recrie o serviço do chatbot:
-
-```bash
-docker compose up -d --build chatbot
-```
-
-Envie um evento de teste:
-
-```bash
-curl -X POST http://localhost:3001/webhook \
-  -H 'Content-Type: application/json' \
-  -d '{"event":"message","payload":{"id":"teste-1","from":"5567999999999@c.us","fromMe":false,"body":"preço do teclado"}}'
-```
-
-Com `SEND_ENABLED=false`, o webhook classifica a mensagem e registra o resultado, mas não envia nada ao WhatsApp. Para voltar ao envio real, altere para `SEND_ENABLED=true` e execute `docker compose up -d`.
-
-## 8. Testar mensagens reais
-
-Com a sessão em `WORKING` e `SEND_ENABLED=true`:
-
-1. Envie uma mensagem de outro número para o WhatsApp conectado à WAHA.
-2. Veja o log do chatbot:
-
-```bash
-docker compose logs -f chatbot
-```
-
-3. O servidor recebe o evento, identifica a intenção e chama `POST /api/sendText` da WAHA.
-4. A resposta retorna ao WhatsApp que enviou a mensagem.
-
-Mensagens de grupos são ignoradas no exemplo. Mensagens enviadas pelo próprio bot também são ignoradas para evitar loop.
-
-## 9. Estrutura do projeto
+## 3. Estrutura do projeto
 
 ```text
-chatbot-waha-aula/
+chatbot-waha-nlp/
 ├── docker-compose.yml
 ├── .env.example
 ├── .gitignore
@@ -182,6 +49,8 @@ chatbot-waha-aula/
 └── chatbot/
     ├── Dockerfile
     ├── package.json
+    ├── datasets/
+    │   └── dados_treinamento.csv
     ├── public/
     │   └── index.html
     └── src/
@@ -191,87 +60,181 @@ chatbot-waha-aula/
         └── data.js
 ```
 
-- `server.js`: Express, endpoints de teste, webhook e integração com WAHA.
-- `nlp.js`: classificação didática por palavras-chave e pontuação.
-- `chatbot.js`: regras para construir respostas.
-- `data.js`: catálogo e pedidos fictícios.
-- `public/index.html`: simulador no navegador.
+| Arquivo | Função |
+|---|---|
+| `docker-compose.yml` | Sobe os serviços `waha` e `chatbot` e configura o webhook global. |
+| `.env.example` | Modelo das variáveis de ambiente. Copie para `.env`. |
+| `chatbot/Dockerfile` | Imagem `node:22-alpine` com o Express (única dependência). |
+| `src/server.js` | Express: webhook, simulador, endpoints de teste e envio para a WAHA. |
+| `src/nlp.js` | Normalização, TF-IDF, treino e avaliação da Regressão Logística. |
+| `src/chatbot.js` | Regras que transformam a intenção em resposta. |
+| `src/data.js` | Catálogo de produtos e pedidos fictícios. |
+| `datasets/dados_treinamento.csv` | 120 frases rotuladas usadas no treino. |
+| `public/index.html` | Simulador no navegador. |
 
-## 10. Atividades sugeridas
+## 4. Preparar o projeto
 
-1. Adicionar a intenção `horario` e responder com horário de atendimento.
-2. Adicionar um produto ao catálogo e consultar preço/estoque.
-3. Criar uma intenção `frete` e simular o cálculo.
-4. Adicionar sinônimos e testar mensagens ambíguas.
-5. Comparar a classificação por palavras-chave com TF-IDF ou outro método de NLP.
-6. Integrar uma API pública ou simulada para consultar dados externos.
+1. Abra um terminal na pasta que contém o `docker-compose.yml`.
+2. Copie o arquivo de ambiente.
 
-## 11. Portas, isolamento e problemas comuns
+   macOS/Linux:
 
-As portas estão vinculadas a `127.0.0.1`, portanto os serviços ficam acessíveis apenas no próprio computador. Se as portas 3000 ou 3001 já estiverem ocupadas, altere `WAHA_PORT` e/ou `CHATBOT_PORT` no `.env`.
+   ```bash
+   cp .env.example .env
+   ```
 
-Se o aluno receber `no configuration file provided`, ele executou o comando fora da pasta do `docker-compose.yml`.
+   Windows PowerShell:
 
-Se receber `401 Unauthorized`, confira se o header `X-Api-Key` enviado pelo chatbot é igual ao `WHATSAPP_API_KEY` que o Compose passou à WAHA. Consulte a variável efetiva sem publicar a chave:
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+3. Gere uma chave aleatória.
+
+   macOS/Linux:
+
+   ```bash
+   openssl rand -hex 24
+   ```
+
+   Windows PowerShell:
+
+   ```powershell
+   -join ((1..48) | ForEach-Object { '{0:x}' -f (Get-Random -Maximum 16) })
+   ```
+
+4. Edite o `.env` e coloque a chave gerada em `WAHA_API_KEY`.
+
+> O `.env.example` traz uma chave de exemplo apenas para mostrar o formato. **Substitua-a sempre** por uma chave gerada por você. O `.env` já está no `.gitignore` e não deve ser publicado.
+
+### Variáveis do `.env`
+
+| Variável | Padrão | Para que serve |
+|---|---|---|
+| `WAHA_API_KEY` | — (obrigatória) | Chave da API. O Compose a entrega à WAHA (como `WHATSAPP_API_KEY`) e ao chatbot, que a envia no header `X-Api-Key`. |
+| `WAHA_IMAGE` | `devlikeapro/waha:latest` | Imagem da WAHA conforme a arquitetura do computador. |
+| `WHATSAPP_DEFAULT_ENGINE` | `WEBJS` | Engine usado pela WAHA. |
+| `WAHA_SESSION` | `default` | Nome da sessão. Deve ser igual ao nome criado no Dashboard. |
+| `WAHA_PORT` | `3000` | Porta local da WAHA. |
+| `CHATBOT_PORT` | `3001` | Porta local do chatbot. |
+| `SEND_ENABLED` | `true` | `true` envia respostas ao WhatsApp; `false` só processa o webhook. |
+| `COMPOSE_PROJECT_NAME` | `chatbot-aula` | Prefixo dos nomes dos containers (opcional). |
+
+Se `WAHA_API_KEY` não estiver definida, o Compose interrompe a inicialização com a mensagem `Defina WAHA_API_KEY no arquivo .env`.
+
+### Imagem da WAHA por arquitetura
+
+Ajuste `WAHA_IMAGE` no `.env`:
+
+- Mac com Apple Silicon (M1/M2/M3/M4): `devlikeapro/waha:arm`
+- Windows/Linux x86_64 (Intel/AMD): `devlikeapro/waha:latest`
+
+Não use a imagem `arm` em computadores Intel/AMD. Para outras arquiteturas e tags, consulte a documentação oficial.
+
+## 5. Subir o ambiente
+
+Na pasta do projeto:
 
 ```bash
-docker compose exec waha printenv WHATSAPP_API_KEY
+docker compose up -d --build
 ```
 
-Se a sessão ficar em `STARTING`, examine `docker compose logs --tail=200 waha`; confira arquitetura da imagem e erros do Chromium/Puppeteer. Se ficar em `SCAN_QR_CODE`, conclua a leitura do QR. O chatbot só responde quando a sessão estiver `WORKING`.
+O `--build` constrói a imagem do chatbot. Repita-o sempre que alterar o código ou o CSV.
 
-Se o aluno já tiver outro projeto usando os nomes fixos de containers, altere `COMPOSE_PROJECT_NAME` no `.env` ou remova `container_name` do Compose. Para evitar conflito de portas, ajuste também `WAHA_PORT` e `CHATBOT_PORT`.
-
-## 12. Encerrar e preservar a sessão
-
-Parar os containers sem apagar a sessão:
+Verifique os containers:
 
 ```bash
-docker compose down
+docker compose ps
 ```
 
-Para iniciar novamente:
+Acompanhe os logs (cada comando em uma janela):
 
 ```bash
-docker compose up -d
+docker compose logs -f waha
+docker compose logs -f chatbot
 ```
 
-**Não use `docker compose down -v`** se quiser preservar a autenticação e os dados do volume `waha_sessions`.
+Ao iniciar, o chatbot treina o classificador e mostra no log algo como:
 
-## Segurança e uso responsável
+```text
+[NLP] Dataset: 120 exemplos | Treino: 88 | Teste: 32
+[NLP] Acurácia da avaliação: 100.0%
+Chatbot ouvindo na porta 3001
+```
 
-- Cada aluno deve manter sua API Key privada e não publicar o `.env`.
-- Não exponha a porta da WAHA à rede pública. O Compose usa `127.0.0.1` de propósito.
-- O webhook do exemplo é didático e não valida assinatura/segredo de origem; não use esta configuração diretamente em produção.
-- Utilize apenas números e conversas com autorização. Evite disparos em massa.
-- A WAHA automatiza o WhatsApp Web por meio de um mecanismo não oficial da API do WhatsApp. Isso pode envolver risco de bloqueio/restrição da conta e alterações de compatibilidade. Para a aula, prefira números de teste/dedicados, com consentimento, e verifique os termos aplicáveis antes de usar contas pessoais.
-- O classificador é baseado em regras e palavras-chave; não é um modelo treinado de aprendizado de máquina.
+## 6. Conectar o WhatsApp do aluno
 
-## Documentação oficial
+1. Abra http://localhost:3000/dashboard.
+2. Conecte o Dashboard à API usando a chave definida em `WAHA_API_KEY`, se for solicitada.
+3. Na área **Sessions**, crie uma sessão chamada exatamente `default` (o valor de `WAHA_SESSION`).
+4. Inicie a sessão e aguarde o estado `SCAN_QR_CODE`.
+5. Exiba o QR Code e leia pelo celular: **WhatsApp › Dispositivos conectados › Conectar dispositivo**.
+6. Aguarde o estado `WORKING`. O chatbot só responde nesse estado.
 
-- WAHA Quick Start: https://waha.devlike.pro/docs/overview/quick-start/
-- WAHA Engines e imagens Docker: https://waha.devlike.pro/docs/how-to/engines/
-- WAHA Events e Webhooks: https://waha.devlike.pro/docs/how-to/events/
-- WAHA Sessions: https://waha.devlike.pro/docs/how-to/sessions/
+O Compose já define o webhook global da WAHA para `http://chatbot:3001/webhook`, com o evento `message`. **Não configure um segundo webhook igual na sessão**, ou cada mensagem chegará duas vezes ao chatbot.
 
-## 8. Treinamento de NLP com o dataset da aula
+## 7. Como funciona o classificador
 
-O exemplo foi ampliado para utilizar o arquivo `chatbot/datasets/dados_treinamento.csv`, derivado do material da aula. Ele contém 120 mensagens rotuladas, distribuídas igualmente entre quatro intenções: `saudacao`, `preco`, `estoque` e `pedido` (30 exemplos por intenção).
+O arquivo `chatbot/datasets/dados_treinamento.csv` tem 120 mensagens rotuladas, 30 para cada uma das quatro intenções: `saudacao`, `preco`, `estoque` e `pedido`.
 
-Ao iniciar, o servidor JavaScript:
+Quando o container do chatbot inicia, o `nlp.js`:
 
 1. lê o CSV;
-2. normaliza as mensagens e gera características com TF-IDF (unigramas e bigramas);
-3. separa os dados de forma estratificada em treinamento e teste (75%/25%);
-4. treina uma Regressão Logística multiclasse implementada em JavaScript;
-5. imprime a acurácia da avaliação nos logs;
-6. treina novamente com todos os exemplos para classificar as mensagens recebidas pelo WhatsApp.
+2. normaliza as mensagens (minúsculas, sem acentos e sem pontuação);
+3. gera características com TF-IDF, usando palavras e pares de palavras (bigramas);
+4. separa os dados de forma estratificada e reproduzível em treino (75%) e teste (25%);
+5. treina uma Regressão Logística multiclasse (softmax), implementada em JavaScript, sem bibliotecas de aprendizado de máquina;
+6. mostra a acurácia da avaliação no log;
+7. treina novamente com todos os exemplos, e é esse modelo final que classifica as mensagens recebidas.
 
-O classificador retorna a intenção, a confiança e as probabilidades por classe. Quando a confiança é baixa, o chatbot trata a mensagem como `desconhecida` e pede que o usuário reformule. A resposta final ainda utiliza as regras de negócio em `chatbot.js` para consultar os produtos e pedidos simulados em `data.js`.
+O classificador retorna a intenção, a confiança e a probabilidade de cada classe. **Se a confiança for menor que 0,42**, a intenção passa a ser `desconhecida` e o bot pede que o usuário reformule.
 
-### Testar o classificador sem WhatsApp
+Depois da classificação, o `chatbot.js` aplica regras simples: procura o nome de um produto do catálogo no texto (para `preco` e `estoque`) e extrai um número de pedido com 4 ou mais dígitos (para `pedido`). Os dados vêm de `data.js`:
 
-Com os containers ativos, envie uma mensagem para o endpoint de simulação:
+| Produto | Preço | Estoque |
+|---|---|---|
+| Teclado | R$ 129,90 | 12 |
+| Mouse | R$ 79,90 | 0 |
+| Headset | R$ 199,90 | 7 |
+
+Pedidos de exemplo: `1001` (Em separação), `1002` (Enviado) e `1003` (Entregue).
+
+### Exemplos de resultado
+
+| Mensagem | Intenção | Confiança | Resposta |
+|---|---|---|---|
+| Oi, tudo bem? | `saudacao` | 75% | Apresentação do assistente |
+| Quanto custa o teclado? | `preco` | 84% | Teclado: R$ 129,90. |
+| Vocês ainda têm mouse disponível? | `estoque` | 69% | No momento, Mouse está sem estoque. |
+| Onde está meu pedido 1002? | `pedido` | 81% | O pedido 1002 está: Enviado. |
+| Quero saber o valor do notebook | `preco` | 67% | Lista os produtos disponíveis (notebook não está no catálogo). |
+| Quero falar com um atendente sobre a garantia | `desconhecida` | 36% | Pede para reformular. |
+
+A última mensagem cai em `desconhecida` porque não existe intenção de atendimento ou garantia no dataset. Isso é esperado: o modelo não deve inventar uma classe que não aprendeu.
+
+### Limitações
+
+- São apenas 120 exemplos controlados. A acurácia do teste não garante bom desempenho em conversas reais.
+- Frases curtas ou fora do padrão podem ficar abaixo do limite mesmo quando a intenção parece óbvia (por exemplo, `estoque do mouse` sai como `desconhecida`).
+- Frases fora do assunto podem passar do limite e receber uma intenção errada (por exemplo, `qual a capital da França` sai como `pedido`, com 47%).
+- O limite de 0,42 equilibra esses dois tipos de erro e deve ser revisto sempre que o dataset mudar.
+
+## 8. Testar sem WhatsApp
+
+Com os containers ativos, os endereços abaixo funcionam no seu computador:
+
+| Endereço | O que é |
+|---|---|
+| http://localhost:3001 | Simulador no navegador |
+| http://localhost:3001/health | Saúde do chatbot e se o envio está ativo |
+| http://localhost:3001/api/produtos | Catálogo fictício |
+| http://localhost:3001/api/pedidos/1002 | Pedido de exemplo (um número inexistente retorna 404) |
+| http://localhost:3000/dashboard | Dashboard da WAHA |
+| http://localhost:3000 | Swagger da WAHA |
+
+Para testar a classificação pelo terminal, envie uma mensagem para `/simular`. Nada é enviado ao WhatsApp.
+
+macOS/Linux:
 
 ```bash
 curl -X POST http://localhost:3001/simular \
@@ -279,24 +242,108 @@ curl -X POST http://localhost:3001/simular \
   -d '{"texto":"Quanto custa o teclado?"}'
 ```
 
-Experimente também:
+Windows PowerShell:
 
-- `Oi, tudo bem?`
-- `Quero saber o valor do notebook`
-- `Vocês ainda têm mouse disponível?`
-- `Onde está meu pedido 1002?`
-- `Quero falar com um atendente sobre a garantia`
+```powershell
+Invoke-RestMethod -Method Post -Uri http://localhost:3001/simular -ContentType 'application/json' -Body '{"texto":"Quanto custa o teclado?"}'
+```
 
-A última mensagem pode ser classificada como desconhecida porque a base atual não possui uma intenção de garantia/atendimento. Isso é intencional: o modelo não deve inventar uma classe que não foi ensinada.
+A resposta traz `intencao`, `confianca`, `resposta` e `probabilidades`.
 
-### Atividade de treinamento para os alunos
+## 9. Testar o webhook sem enviar mensagens
 
-1. Acrescente pelo menos cinco novas frases para cada intenção no CSV.
-2. Reinicie o serviço do chatbot para treinar novamente: `docker compose up -d --build chatbot`.
-3. Compare as métricas e teste frases escritas de formas diferentes.
-4. Crie uma nova intenção (por exemplo, `garantia`), inclua exemplos no CSV e implemente a resposta correspondente em `chatbot.js`.
-5. Observe o que acontece quando uma mensagem contém palavras de mais de uma intenção ou não se parece com os exemplos de treinamento.
+1. No `.env`, altere `SEND_ENABLED=false`.
+2. Recrie o serviço do chatbot:
 
-**Relação com o notebook da aula:** o notebook original compara Regressão Logística e Árvore de Decisão usando o mesmo conjunto de intenções. Nesta versão integrada ao projeto WAHA, a classificação em tempo de execução foi implementada em JavaScript com Regressão Logística multiclasse e TF-IDF, para que os alunos não precisem instalar Python. A Árvore de Decisão continua podendo ser estudada e comparada no notebook.
+   ```bash
+   docker compose up -d --build chatbot
+   ```
 
-**Limitação didática:** são apenas 120 exemplos controlados. A acurácia obtida no teste não garante desempenho em conversas reais; o dataset deve ser ampliado com variações linguísticas e exemplos coletados/validados com cuidado.
+3. Envie um evento de teste:
+
+   ```bash
+   curl -X POST http://localhost:3001/webhook \
+     -H 'Content-Type: application/json' \
+     -d '{"event":"message","payload":{"id":"teste-1","from":"5567999999999@c.us","fromMe":false,"body":"preço do teclado"}}'
+   ```
+
+Com `SEND_ENABLED=false`, o webhook classifica a mensagem, registra o resultado no log e devolve o JSON da resposta, sem enviar nada ao WhatsApp. Para voltar ao envio real, altere para `SEND_ENABLED=true` e execute `docker compose up -d`.
+
+Se enviar o mesmo `id` duas vezes, a segunda chamada é ignorada: o webhook guarda os ids já processados para não responder em duplicidade. Use um `id` novo a cada teste.
+
+## 10. Testar com mensagens reais
+
+Com a sessão em `WORKING` e `SEND_ENABLED=true`:
+
+1. Envie uma mensagem **de outro número** para o WhatsApp conectado à WAHA. Mensagens enviadas pelo próprio número conectado chegam com `fromMe` e são ignoradas.
+2. Acompanhe o log:
+
+   ```bash
+   docker compose logs -f chatbot
+   ```
+
+3. O chatbot recebe o evento, identifica a intenção e chama `POST /api/sendText` da WAHA.
+4. A resposta chega ao WhatsApp de quem enviou a mensagem.
+
+O webhook ignora:
+
+- eventos que não sejam `message`;
+- mensagens do próprio bot (`fromMe`), para evitar loop;
+- mensagens sem texto;
+- grupos (`@g.us`) e atualizações de status (`status@broadcast`);
+- mensagens com `id` já processado.
+
+## 11. Atividades sugeridas
+
+1. Acrescente pelo menos cinco novas frases para cada intenção no CSV, reconstrua o chatbot (`docker compose up -d --build chatbot`) e compare a acurácia no log.
+2. Crie a intenção `horario`: inclua exemplos no CSV e implemente a resposta em `chatbot.js`.
+3. Adicione um produto em `data.js` e consulte preço e estoque.
+4. Crie a intenção `frete` e simule o cálculo.
+5. Teste frases ambíguas ou com palavras de mais de uma intenção e avalie o efeito de mudar o limite de 0,42 em `nlp.js`.
+6. Compare a Regressão Logística com uma classificação por palavras-chave ou com a Árvore de Decisão do notebook original da aula.
+7. Integre uma API pública ou simulada para consultar dados externos.
+
+## 12. Problemas comuns
+
+| Sintoma | O que verificar |
+|---|---|
+| `no configuration file provided` | O comando foi executado fora da pasta do `docker-compose.yml`. |
+| `Defina WAHA_API_KEY no arquivo .env` | O `.env` não existe ou está sem a chave. |
+| `401 Unauthorized` no log do chatbot | A chave da WAHA difere da do chatbot. Confira com `docker compose exec waha printenv WHATSAPP_API_KEY`, sem publicar o resultado. |
+| Sessão parada em `STARTING` | Veja `docker compose logs --tail=200 waha`. Confira a imagem (`arm` ou `latest`) e erros do Chromium/Puppeteer. |
+| Sessão parada em `SCAN_QR_CODE` | Conclua a leitura do QR Code no celular. |
+| Porta 3000 ou 3001 ocupada | Altere `WAHA_PORT` e/ou `CHATBOT_PORT` no `.env`. |
+| Conflito com nomes de containers | Altere `COMPOSE_PROJECT_NAME` no `.env`. |
+| O bot não responde | A sessão está em `WORKING`? `SEND_ENABLED=true`? A mensagem veio de outro número e não de um grupo? |
+| Respostas em dobro | Há um webhook configurado também na sessão. Remova-o e mantenha só o global do Compose. |
+
+## 13. Encerrar e preservar a sessão
+
+Parar os containers sem apagar a sessão:
+
+```bash
+docker compose down
+```
+
+Iniciar novamente:
+
+```bash
+docker compose up -d
+```
+
+**Não use `docker compose down -v`** se quiser preservar a autenticação: o `-v` apaga o volume `waha_sessions` e será preciso ler o QR Code de novo.
+
+## 14. Segurança e uso responsável
+
+- Mantenha a chave de API privada. Gere a sua, guarde-a só no `.env` e não publique esse arquivo.
+- Não exponha as portas à rede pública. O Compose usa `127.0.0.1` de propósito, para que só o próprio computador acesse.
+- O webhook do exemplo é didático e não valida assinatura nem segredo de origem. Não use esta configuração diretamente em produção.
+- Use apenas números e conversas com autorização. Evite disparos em massa.
+- A WAHA automatiza o WhatsApp Web, um mecanismo não oficial. Isso pode levar a bloqueio ou restrição da conta e a mudanças de compatibilidade. Na aula, prefira números de teste ou dedicados, com consentimento, e verifique os termos aplicáveis antes de usar contas pessoais. Para uso comercial crítico, avalie a WhatsApp Business Platform oficial.
+
+## 15. Documentação oficial
+
+- WAHA Quick Start: https://waha.devlike.pro/docs/overview/quick-start/
+- WAHA Engines e imagens Docker: https://waha.devlike.pro/docs/how-to/engines/
+- WAHA Events e Webhooks: https://waha.devlike.pro/docs/how-to/events/
+- WAHA Sessions: https://waha.devlike.pro/docs/how-to/sessions/

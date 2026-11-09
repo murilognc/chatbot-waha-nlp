@@ -1,0 +1,32 @@
+services:
+  waha:
+    image: ${WAHA_IMAGE:-devlikeapro/waha:latest}
+    container_name: ${COMPOSE_PROJECT_NAME:-chatbot-aula}-waha
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WAHA_PORT:-3000}:3000"
+    environment:
+      WHATSAPP_API_KEY: ${WAHA_API_KEY:?Defina WAHA_API_KEY no arquivo .env}
+      WHATSAPP_DEFAULT_ENGINE: ${WHATSAPP_DEFAULT_ENGINE:-WEBJS}
+      WHATSAPP_HOOK_URL: http://chatbot:3001/webhook
+      WHATSAPP_HOOK_EVENTS: message
+    volumes:
+      - waha_sessions:/app/.sessions
+
+  chatbot:
+    build: ./chatbot
+    container_name: ${COMPOSE_PROJECT_NAME:-chatbot-aula}-chatbot
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${CHATBOT_PORT:-3001}:3001"
+    environment:
+      PORT: 3001
+      WAHA_URL: http://waha:3000
+      WAHA_API_KEY: ${WAHA_API_KEY:?Defina WAHA_API_KEY no arquivo .env}
+      WAHA_SESSION: ${WAHA_SESSION:-default}
+      SEND_ENABLED: ${SEND_ENABLED:-true}
+    depends_on:
+      - waha
+
+volumes:
+  waha_sessions:

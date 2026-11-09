@@ -1,0 +1,121 @@
+texto,intencao
+oi,saudacao
+olá,saudacao
+bom dia,saudacao
+boa tarde,saudacao
+boa noite,saudacao
+oi tudo bem,saudacao
+olá gostaria de ajuda,saudacao
+"oi, tudo certo",saudacao
+"olá, tudo bem",saudacao
+"bom dia, preciso de ajuda",saudacao
+"boa tarde, poderia me ajudar",saudacao
+"boa noite, preciso de uma informação",saudacao
+"oi, posso tirar uma dúvida",saudacao
+"olá, posso fazer uma pergunta",saudacao
+"oi, preciso de ajuda",saudacao
+"olá, gostaria de falar com vocês",saudacao
+"bom dia, tudo bem",saudacao
+"boa tarde, tudo bem",saudacao
+"boa noite, tudo bem",saudacao
+"oi, gostaria de uma informação",saudacao
+"olá, preciso de uma informação",saudacao
+"oi, vocês podem me ajudar",saudacao
+"olá, podem me ajudar",saudacao
+"bom dia, podem me ajudar",saudacao
+"boa tarde, tenho uma dúvida",saudacao
+"boa noite, tenho uma pergunta",saudacao
+"oi, gostaria de ajuda com uma compra",saudacao
+"olá, quero tirar uma dúvida",saudacao
+"oi, posso pedir uma informação",saudacao
+"olá, gostaria de atendimento",saudacao
+qual o preço do notebook,preco
+quanto custa o celular,preco
+qual o valor desse produto,preco
+quero saber o preço do computador,preco
+me informe o valor do smartphone,preco
+quanto vou pagar pelo notebook,preco
+esse produto custa quanto,preco
+quanto custa esse produto,preco
+qual é o valor do notebook,preco
+qual é o preço desse celular,preco
+quanto custa o computador,preco
+gostaria de saber o preço,preco
+pode me informar o valor,preco
+qual o valor do celular,preco
+quanto custa esse notebook,preco
+quero saber quanto custa,preco
+poderia informar o preço,preco
+me diga quanto custa o produto,preco
+qual o preço desse computador,preco
+quanto vou pagar por esse celular,preco
+qual o valor desse notebook,preco
+gostaria de saber quanto custa o smartphone,preco
+esse notebook está quanto,preco
+esse celular custa quanto,preco
+quanto está custando o produto,preco
+qual é o preço do smartphone,preco
+quanto custa para comprar esse produto,preco
+me passa o preço do notebook,preco
+pode me dizer o valor do celular,preco
+quero consultar o preço do produto,preco
+tem notebook em estoque,estoque
+o celular está disponível,estoque
+vocês têm esse produto,estoque
+tem o smartphone disponível,estoque
+quero saber se o computador está em estoque,estoque
+esse produto ainda está disponível,estoque
+posso comprar esse produto agora,estoque
+o notebook está disponível,estoque
+vocês têm celular em estoque,estoque
+tem esse computador disponível,estoque
+ainda tem esse produto,estoque
+esse celular está disponível para compra,estoque
+tem smartphone em estoque,estoque
+o produto está disponível,estoque
+vocês ainda têm esse notebook,estoque
+quero saber se tem celular disponível,estoque
+esse computador ainda está em estoque,estoque
+tem disponibilidade desse produto,estoque
+o notebook ainda está disponível,estoque
+vocês têm esse celular disponível,estoque
+posso comprar esse notebook,estoque
+esse produto está disponível para compra,estoque
+ainda existe esse produto em estoque,estoque
+tem esse modelo disponível,estoque
+quero saber se o produto está disponível,estoque
+há notebooks disponíveis,estoque
+há celulares em estoque,estoque
+esse smartphone está disponível,estoque
+vocês possuem esse produto em estoque,estoque
+é possível comprar esse produto agora,estoque
+onde está meu pedido,pedido
+quero acompanhar meu pedido,pedido
+qual o status da minha entrega,pedido
+meu pedido já foi enviado,pedido
+quando meu pedido vai chegar,pedido
+quero rastrear minha compra,pedido
+como acompanho a entrega,pedido
+onde está a minha compra,pedido
+como posso rastrear meu pedido,pedido
+qual a situação do meu pedido,pedido
+quero saber onde está meu pedido,pedido
+quando minha compra será entregue,pedido
+me informe o status do pedido,pedido
+meu pedido foi enviado,pedido
+como faço para acompanhar meu pedido,pedido
+quero acompanhar a entrega,pedido
+tem como rastrear minha compra,pedido
+quando meu pedido chega,pedido
+gostaria de rastrear meu pedido,pedido
+quero saber quando vai chegar,pedido
+onde posso acompanhar minha entrega,pedido
+meu pedido está a caminho,pedido
+como vejo o status da minha compra,pedido
+quero consultar meu pedido,pedido
+pode me informar onde está meu pedido,pedido
+qual a previsão de entrega do meu pedido,pedido
+quero saber a previsão de entrega,pedido
+como faço para rastrear a entrega,pedido
+me diga o status da minha compra,pedido
+quero verificar minha entrega,pedido

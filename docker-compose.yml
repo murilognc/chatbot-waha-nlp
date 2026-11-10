@@ -25,6 +25,8 @@ services:
       WAHA_API_KEY: ${WAHA_API_KEY:?Defina WAHA_API_KEY no arquivo .env}
       WAHA_SESSION: ${WAHA_SESSION:-default}
       SEND_ENABLED: ${SEND_ENABLED:-true}
+    volumes:
+      - ./chatbot/datasets:/app/datasets
     depends_on:
       - waha
 

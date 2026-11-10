@@ -29,6 +29,56 @@ olá gostaria de ajuda,saudacao
 "olá, quero tirar uma dúvida",saudacao
 "oi, posso pedir uma informação",saudacao
 "olá, gostaria de atendimento",saudacao
+oie,saudacao
+oii,saudacao
+ola,saudacao
+opa,saudacao
+eae,saudacao
+"e aí, tudo bem",saudacao
+oi tudo bom,saudacao
+olá tudo bom,saudacao
+tudo bom,saudacao
+tudo certo,saudacao
+como vai,saudacao
+oi bom dia,saudacao
+oi boa tarde,saudacao
+ola boa noite,saudacao
+opa boa tarde,saudacao
+bom dia pessoal,saudacao
+boa tarde pessoal,saudacao
+oi pessoal,saudacao
+boa noite pessoal,saudacao
+"olá, boa noite",saudacao
+"bom dia, tudo bom",saudacao
+"boa tarde, tudo certo",saudacao
+ola tudo bem,saudacao
+"oi, como vai",saudacao
+"olá, como vai você",saudacao
+oi atendente,saudacao
+olá atendente,saudacao
+tem alguém aí,saudacao
+alguém pode me atender,saudacao
+preciso de ajuda,saudacao
+quero ajuda,saudacao
+ajuda,saudacao
+atendimento,saudacao
+quero atendimento,saudacao
+quero falar com atendente,saudacao
+falar com atendente,saudacao
+"bom dia, tudo certo",saudacao
+oi oi,saudacao
+"oi, gostaria de ajuda",saudacao
+"boa tarde, preciso de ajuda",saudacao
+"olá, bom dia",saudacao
+"opa, tudo bem",saudacao
+"eae, tudo certo",saudacao
+"oi, alguém pode ajudar",saudacao
+"olá, preciso de atendimento",saudacao
+"bom dia, gostaria de atendimento",saudacao
+"oi, tudo tranquilo",saudacao
+tudo tranquilo,saudacao
+"e aí, beleza",saudacao
+ola bom dia,saudacao
 qual o preço do notebook,preco
 quanto custa o celular,preco
 qual o valor desse produto,preco
@@ -59,6 +109,56 @@ quanto custa para comprar esse produto,preco
 me passa o preço do notebook,preco
 pode me dizer o valor do celular,preco
 quero consultar o preço do produto,preco
+valor notebook,preco
+teclado preco,preco
+custo notebook,preco
+notebook quanto,preco
+valor celular,preco
+celular quanto,preco
+custo celular,preco
+preço smartphone,preco
+smartphone preco,preco
+smartphone quanto,preco
+valor computador,preco
+computador quanto,preco
+valor tablet,preco
+tablet quanto,preco
+preço monitor,preco
+monitor preco,preco
+monitor quanto,preco
+valor impressora,preco
+impressora quanto,preco
+preço fone,preco
+fone preco,preco
+preço teclado,preco
+teclado valor,preco
+valor mouse,preco
+mouse quanto,preco
+valor tv,preco
+tv quanto,preco
+preço produto,preco
+produto quanto,preco
+custo produto,preco
+preço,preco
+preco,preco
+valor,preco
+quanto,preco
+qual o preço,preco
+qual o custo,preco
+quanto fica,preco
+quanto sai,preco
+quanto tá,preco
+qto custa,preco
+quanto custa isso,preco
+quanto custa o tablet,preco
+qual o preço do mouse,preco
+qual o valor da impressora,preco
+quanto tá o fone,preco
+quanto está o teclado,preco
+quanto custa a tv,preco
+quanto custa o monitor,preco
+vlr notebook,preco
+vlr do celular,preco
 tem notebook em estoque,estoque
 o celular está disponível,estoque
 vocês têm esse produto,estoque
@@ -89,6 +189,56 @@ há celulares em estoque,estoque
 esse smartphone está disponível,estoque
 vocês possuem esse produto em estoque,estoque
 é possível comprar esse produto agora,estoque
+tem notebook,estoque
+estoque notebook,estoque
+tem celular,estoque
+celular disponivel,estoque
+smartphone disponível,estoque
+estoque smartphone,estoque
+tem computador,estoque
+estoque computador,estoque
+tem tablet,estoque
+tablet disponível,estoque
+monitor disponível,estoque
+estoque monitor,estoque
+tem impressora,estoque
+impressora disponivel,estoque
+tem fone,estoque
+fone disponível,estoque
+tem mouse,estoque
+mouse disponivel,estoque
+teclado disponível,estoque
+tem teclado,estoque
+tem tv,estoque
+tv disponível,estoque
+produto disponivel,estoque
+estoque,estoque
+disponível,estoque
+disponivel,estoque
+tem estoque,estoque
+tem disponível,estoque
+ainda tem,estoque
+notebook em estoque,estoque
+está disponível,estoque
+esta disponivel,estoque
+tá disponível,estoque
+acabou o estoque,estoque
+esgotou,estoque
+está esgotado,estoque
+quando volta pro estoque,estoque
+voces tem celular,estoque
+o mouse está disponível,estoque
+ainda tem tablet,estoque
+acabou o notebook,estoque
+o celular esgotou,estoque
+smartphone em estoque,estoque
+impressora em estoque,estoque
+ainda tem fone,estoque
+tem teclado disponivel,estoque
+o monitor acabou,estoque
+tv em estoque,estoque
+voces tem notebook,estoque
+ainda tem computador,estoque
 onde está meu pedido,pedido
 quero acompanhar meu pedido,pedido
 qual o status da minha entrega,pedido
@@ -119,3 +269,53 @@ quero saber a previsão de entrega,pedido
 como faço para rastrear a entrega,pedido
 me diga o status da minha compra,pedido
 quero verificar minha entrega,pedido
+meu pedido,pedido
+rastreio pedido,pedido
+rastrear compra,pedido
+rastrear entrega,pedido
+status entrega,pedido
+status do notebook,pedido
+entrega atrasada,pedido
+pedido atrasou,pedido
+minha compra,pedido
+minha encomenda,pedido
+cade pedido,pedido
+pedido enviado,pedido
+pedido chegou,pedido
+acompanhar pedido,pedido
+acompanhar entrega,pedido
+codigo rastreio,pedido
+situação pedido,pedido
+cadê meu pedido,pedido
+previsão do pedido,pedido
+prazo de entrega,pedido
+código de rastreio,pedido
+situacao da entrega,pedido
+rastreamento,pedido
+rastreio,pedido
+pedido,pedido
+entrega,pedido
+meu notebook já chegou,pedido
+entrega notebook,pedido
+rastreio smartphone,pedido
+pedido celular,pedido
+cadê meu notebook,pedido
+meu celular não chegou,pedido
+o smartphone já foi enviado,pedido
+quando chega o tablet,pedido
+entrega do monitor,pedido
+status do pedido do computador,pedido
+rastreio da impressora,pedido
+meu fone não chegou,pedido
+cadê meu mouse,pedido
+o teclado foi enviado,pedido
+minha tv não chegou,pedido
+entrega do produto,pedido
+pedido do notebook atrasou,pedido
+quanto tempo para chegar,pedido
+quanto tempo demora a entrega,pedido
+já foi enviado,pedido
+já chegou,pedido
+pedido não chegou,pedido
+não recebi meu pedido,pedido
+o produto não chegou,pedido

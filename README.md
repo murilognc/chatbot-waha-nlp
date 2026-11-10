@@ -1,4 +1,4 @@
-# Chatbot WhatsApp com WAHA e NLP — projeto da aula
+# Chatbot WhatsApp com WAHA e NLP - projeto da aula
 
 Projeto didático com **WAHA + Node.js + Express + Docker Compose**. Um chatbot recebe mensagens do WhatsApp, classifica a intenção com **TF-IDF + Regressão Logística** (implementados em JavaScript) e responde com dados de um catálogo e de pedidos simulados.
 
@@ -29,6 +29,17 @@ WAHA --> WhatsApp de quem enviou a mensagem
 ```
 
 Os dois containers estão na mesma rede do Docker Compose e se encontram pelo nome do serviço (`waha` e `chatbot`). Por isso não é necessário ngrok nem `host.docker.internal`. Cada instalação tem seus próprios containers, chave de API, volume de sessão e QR Code.
+
+### Qual endereço cada parte usa
+
+| Quem chama | Quem recebe | Endereço | Onde está definido |
+|---|---|---|---|
+| WAHA (container) | chatbot | `http://chatbot:3001/webhook` | `WHATSAPP_HOOK_URL` no `docker-compose.yml` |
+| chatbot (container) | WAHA | `http://waha:3000` | `WAHA_URL` no `docker-compose.yml` |
+| Você (navegador ou terminal) | WAHA | `http://localhost:3000` | porta publicada em `127.0.0.1` |
+| Você (navegador ou terminal) | chatbot | `http://localhost:3001` | porta publicada em `127.0.0.1` |
+
+Entre os containers, use sempre o nome do serviço: dentro de um container, `localhost` aponta para o próprio container. `localhost` só funciona a partir do seu computador.
 
 ## 2. Requisitos
 
@@ -69,7 +80,7 @@ chatbot-waha-nlp/
 | `src/nlp.js` | Normalização, TF-IDF, treino e avaliação da Regressão Logística. |
 | `src/chatbot.js` | Regras que transformam a intenção em resposta. |
 | `src/data.js` | Catálogo de produtos e pedidos fictícios. |
-| `datasets/dados_treinamento.csv` | 120 frases rotuladas usadas no treino. |
+| `datasets/dados_treinamento.csv` | 120 frases rotuladas usadas no treino. Chega ao container pelo volume `./chatbot/datasets:/app/datasets`. |
 | `public/index.html` | Simulador no navegador. |
 
 ## 4. Preparar o projeto
@@ -139,7 +150,7 @@ Na pasta do projeto:
 docker compose up -d --build
 ```
 
-O `--build` constrói a imagem do chatbot. Repita-o sempre que alterar o código ou o CSV.
+O `--build` constrói a imagem do chatbot. Repita-o sempre que alterar o código em `chatbot/src` ou `chatbot/public`. O CSV não faz parte da imagem: a pasta `chatbot/datasets` é montada no container como volume, então, depois de editá-lo, basta reiniciar o chatbot (veja a [seção 7](#7-como-funciona-o-classificador)).
 
 Verifique os containers:
 
@@ -186,6 +197,17 @@ Quando o container do chatbot inicia, o `nlp.js`:
 5. treina uma Regressão Logística multiclasse (softmax), implementada em JavaScript, sem bibliotecas de aprendizado de máquina;
 6. mostra a acurácia da avaliação no log;
 7. treina novamente com todos os exemplos, e é esse modelo final que classifica as mensagens recebidas.
+
+### Retreinar depois de editar o CSV
+
+O CSV é lido do volume `./chatbot/datasets:/app/datasets`, então as alterações no arquivo já aparecem dentro do container. Como o treino só acontece na inicialização, reinicie o chatbot para treinar de novo:
+
+```bash
+docker compose restart chatbot
+docker compose logs -f chatbot
+```
+
+A nova acurácia aparece no log. Não é preciso `--build` para mudanças no CSV.
 
 O classificador retorna a intenção, a confiança e a probabilidade de cada classe. **Se a confiança for menor que 0,42**, a intenção passa a ser `desconhecida` e o bot pede que o usuário reformule.
 
@@ -253,10 +275,10 @@ A resposta traz `intencao`, `confianca`, `resposta` e `probabilidades`.
 ## 9. Testar o webhook sem enviar mensagens
 
 1. No `.env`, altere `SEND_ENABLED=false`.
-2. Recrie o serviço do chatbot:
+2. Recrie o serviço do chatbot para ele ler o novo valor:
 
    ```bash
-   docker compose up -d --build chatbot
+   docker compose up -d chatbot
    ```
 
 3. Envie um evento de teste:
@@ -295,7 +317,7 @@ O webhook ignora:
 
 ## 11. Atividades sugeridas
 
-1. Acrescente pelo menos cinco novas frases para cada intenção no CSV, reconstrua o chatbot (`docker compose up -d --build chatbot`) e compare a acurácia no log.
+1. Acrescente pelo menos cinco novas frases para cada intenção no CSV, reinicie o chatbot (`docker compose restart chatbot`) e compare a acurácia no log.
 2. Crie a intenção `horario`: inclua exemplos no CSV e implemente a resposta em `chatbot.js`.
 3. Adicione um produto em `data.js` e consulte preço e estoque.
 4. Crie a intenção `frete` e simule o cálculo.
@@ -315,6 +337,8 @@ O webhook ignora:
 | Porta 3000 ou 3001 ocupada | Altere `WAHA_PORT` e/ou `CHATBOT_PORT` no `.env`. |
 | Conflito com nomes de containers | Altere `COMPOSE_PROJECT_NAME` no `.env`. |
 | O bot não responde | A sessão está em `WORKING`? `SEND_ENABLED=true`? A mensagem veio de outro número e não de um grupo? |
+| Chatbot reinicia em loop com erro `ENOENT` ou `Dataset vazio ou inválido` | O CSV não chegou ao container. Confira o volume `./chatbot/datasets:/app/datasets` no Compose e se `chatbot/datasets/dados_treinamento.csv` existe. |
+| Webhook não chega ou `ECONNREFUSED` entre containers | Algum endereço entre containers foi trocado por `localhost`. Use `http://chatbot:3001/webhook` e `http://waha:3000`. |
 | Respostas em dobro | Há um webhook configurado também na sessão. Remova-o e mantenha só o global do Compose. |
 
 ## 13. Encerrar e preservar a sessão
